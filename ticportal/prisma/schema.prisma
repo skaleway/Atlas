@@ -1,0 +1,301 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String  @id @default(auto()) @map("_id") @db.ObjectId
+  username           String? @unique
+  email              String
+  userId             String  @unique
+  imageUrl           String?
+  role               ROLE    @default(PARTICIPANT)
+  paid               Boolean @default(false)
+  phone              String?
+  firstName          String?
+  lastName           String?
+  description        String?
+  secondaryEmail     String?
+  gardianName        String?
+  gardianPhone       String?
+  location           String?
+  schoolName         String?
+  classLevel         String?
+  region             String?
+  somethingDone      String?
+  whyYouAttending    String?
+  howYoulearnAboutUs String?
+  age                Int?
+
+  team        Team[]
+  memeber     Member[]
+  quizscore   QuizScore[]
+  JoinRequest JoinRequest[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  Courses   Courses[]
+
+  userInfo UserInfos[]
+
+  Message Message[]
+}
+
+model Team {
+  id              String  @id @default(auto()) @map("_id") @db.ObjectId
+  name            String  @unique
+  imageUrl        String
+  inviteCode      String?
+  problemState    String?
+  proposeSolution String?
+  level           Int?    @default(1)
+
+  profileId   String        @db.ObjectId
+  user        User          @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  mentors     String[]      @db.ObjectId
+  members     Member[]
+  JoinRequest JoinRequest[]
+
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  Stage           Stage?            @relation(fields: [stageId], references: [id])
+  stageId         String?           @db.ObjectId
+  QuestionAnswers QuestionAnswers[]
+  // StageQuestion   StageQuestion[]
+  ChatRoom        ChatRoom[]
+
+  @@index([profileId])
+}
+ 
+
+model JoinRequest {
+  id     String        @id @default(auto()) @map("_id") @db.ObjectId
+  status RequestStatus @default(PENDING)
+
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  teamId String @db.ObjectId
+  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Member {
+  id   String     @id @default(auto()) @map("_id") @db.ObjectId
+  role MemberRole @default(GUEST)
+
+  profileId String @db.ObjectId
+  profile   User   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  teamId String @db.ObjectId
+  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  Message Message[]
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  ChatRoom   ChatRoom? @relation(fields: [chatRoomId], references: [id])
+  chatRoomId String?   @db.ObjectId
+
+  @@index([teamId])
+  @@index([profileId])
+}
+
+model Stage {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  stageNumber Int      @unique
+  description String
+  duration    String?
+  months      String[]
+  activities  String[]
+
+  Team          Team[]
+  StageQuestion StageQuestion[]
+  quizzes       StageQuiz[]
+  QuizScore     QuizScore[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  Courses   Courses[]
+}
+
+// model Community {
+//   id String @id @default(auto()) @map("_id") @db.ObjectId
+
+//   profileId String @db.ObjectId
+//   profile   User   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   Message Message[]
+// }
+
+model ChatRoom {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  teamId String @unique @db.ObjectId
+  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Message Message[]
+  members Member[]
+}
+
+model Message {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  message String
+
+  fileUrl  String?
+  imageUrl String?
+  videoUrl String?
+
+  memberId String @db.ObjectId
+  member   Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  deleted Boolean @default(false)
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  chatRoomId String?   @db.ObjectId
+  ChatRoom   ChatRoom? @relation(fields: [chatRoomId], references: [id])
+
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([chatRoomId])
+  @@index([memberId])
+}
+
+model StageQuestion {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  stageId     String  @db.ObjectId
+  stage       Stage   @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  question    String
+  // teamId      String  @db.ObjectId
+  // team        Team    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  isSubmitted Boolean @default(false)
+  description String
+
+  QuestionAnswers QuestionAnswers[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model QuestionAnswers {
+  id              String @id @default(auto()) @map("_id") @db.ObjectId
+  stageQuestionId String @db.ObjectId
+  answer          String
+  teamId          String @db.ObjectId
+
+  stage StageQuestion @relation(fields: [stageQuestionId], references: [id], onDelete: Cascade)
+  team  Team          @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([teamId])
+}
+
+model UserInfos {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  profileId String @db.ObjectId
+  user      User   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  name      String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum ROLE {
+  ADMIN
+  PARTICIPANT
+  MENTOR
+  JUDGE
+}
+
+enum MemberRole {
+  ADMIN
+  GUEST
+}
+
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+//quiz models
+
+model StageQuiz {
+  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  stageId       String     @db.ObjectId
+  stage         Stage      @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  questions     Question[]
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+model Question {
+  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  quizId        String     @db.ObjectId
+  quiz          StageQuiz       @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  text          String
+  answers       Answer[]
+  correctAnswer String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+model Answer {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  questionId String   @db.ObjectId
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  text       String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model QuizScore {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  stageId   String   @db.ObjectId
+  stage     Stage    @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  score     Int      @default(0)
+  createdAt DateTime @default(now())
+  updateAt  DateTime @default(now())
+}
+
+
+
+model Courses {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  content     String
+  description String?
+  status      String?
+  userId      String    @db.ObjectId
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stageId     String    @db.ObjectId
+  stage       Stage     @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  courseType  String?
+  payment     String    @default("Free")
+  duration    DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt
+}

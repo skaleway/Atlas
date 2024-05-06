@@ -1,0 +1,34 @@
+.editor_style {
+    width: 100%;
+    height: 600px;
+    padding: 20px;
+    border-width: 1px;
+    border-radius: 0.75rem;
+    margin-top: 17px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+.editor_style blockquote {
+    /*margin-left: 15px;*/
+}
+
+.editor_style h1 {
+    font-size: 20pt;
+}
+
+.editor_style h2 {
+    font-size: 16pt;
+}
+
+.editor_style p.is-empty {
+    font-size: 14pt;
+}
+
+.editor_style p.is-editor-empty:first-child::before {
+    color: #adb5bd;
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
+}

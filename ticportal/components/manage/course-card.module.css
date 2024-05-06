@@ -1,0 +1,31 @@
+.course_card {
+    width: 250px;
+    height: 300px;
+    /*position: relative;*/
+    padding: 10px;
+    transition: 500ms;
+}
+
+.course_card_rect {
+    height: 55%;
+}
+
+.course_card_rect_1 {
+    height: 100%;
+
+}
+
+.course_card_interior {
+    width: 100%;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    /*align-items: flex-end;*/
+    /*position: absolute;*/
+    /*bottom: 0;*/
+    font-size: 0.875rem/* 14px */;
+    line-height: 1.25rem/* 20px */;
+    --tw-text-opacity: 1;
+    color: rgb(156 163 175 / var(--tw-text-opacity));
+}
+
